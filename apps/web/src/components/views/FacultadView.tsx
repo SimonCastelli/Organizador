@@ -106,7 +106,7 @@ export function FacultadView() {
 
   return (
     <section className="vista">
-      <div className="vista__encabezado">
+      <div className="vista__encabezado" data-num="05">
         <h1>Facultad</h1>
         <button className="boton-primario" onClick={popoverNueva.abrir}>
           + Nueva materia

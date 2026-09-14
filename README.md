@@ -103,17 +103,26 @@ vez de ser una séptima vista.
 
 ## Diseño
 
-Identidad visual tomada de un portfolio personal ya aprobado —
-**Newsreader** (serif, texto) + **JetBrains Mono** (mono, datos/etiquetas/
-nav) sobre una base navy oscura con grid de fondo sutil. El color se
-reserva para barras de 3px, puntos de calendario y chips: facultad
-violeta, personal azul, tareas verde, lab rojo, mails naranja (azul y
-naranja/ámbar son los mismos acentos que ya usaba el portfolio de
-referencia).
+Manual técnico, no SaaS: papel off-white, negro, gris hormigón y **un solo
+acento rojo**. **Inter Black** en mayúsculas y escala enorme para los
+títulos de cada vista, **JetBrains Mono** para todo lo demás (nav, datos,
+etiquetas). Grilla de 12 columnas visible de fondo en el área de
+contenido, numerales de sección grandes junto a cada título (`01 HOY` ...
+`06 MAILS`), textura de grano sutil. Sin gradientes de color, bordes
+redondeados, sombras difusas ni glassmorphism — los popovers, `⌘K` y el
+toast usan una sombra dura sin blur (`6px 6px 0`) en vez de nada.
+
+Las 5 categorías (facultad/personal/tarea/lab/mail) ya no se distinguen
+por color — eso chocaba con "un solo acento" — sino por un código mono de
+3 letras (`FAC`/`PER`/`TAR`/`LAB`/`MAIL`, ver `src/lib/categorias.ts`). El
+rojo queda reservado a "lab" (como una etiqueta de riesgo real) y a lo que
+hace algo *ahora*: botones primarios, foco, "hoy", "sin conexión",
+"deshacer".
 
 Reglas de interacción: motion < 300ms con ease-out, popovers siempre
 anclados al elemento que los abre (nunca modales centrados — ni siquiera
-el login), la paleta ⌘K sin animación, y ningún flujo destructivo pide
+el login), la paleta ⌘K sin animación (y en modo "consola": la única
+superficie invertida, negro sobre papel), y ningún flujo destructivo pide
 confirmación: borra y ofrece **deshacer por 6 segundos** en un toast.
 
 ## Deploy del front

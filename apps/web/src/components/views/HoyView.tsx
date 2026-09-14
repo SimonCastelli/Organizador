@@ -21,7 +21,7 @@ export function HoyView() {
 
   return (
     <section className="vista">
-      <div className="vista__encabezado">
+      <div className="vista__encabezado" data-num="01">
         <div>
           <h1>{format(hoy, "EEEE d 'de' MMMM", { locale: es })}</h1>
         </div>

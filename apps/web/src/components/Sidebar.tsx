@@ -1,3 +1,4 @@
+import { CODIGO_CATEGORIA } from "../lib/categorias";
 import { VISTAS } from "../lib/vistas";
 import type { Calendario, Vista } from "@organizador/shared";
 
@@ -39,7 +40,7 @@ export function Sidebar({ vistaActual, onCambiarVista, calendarios, onToggleCale
             onClick={() => onToggleCalendario(c.id)}
             aria-pressed={c.visible}
           >
-            <span className="punto" />
+            <span className="punto mono">{CODIGO_CATEGORIA[c.categoria]}</span>
             {c.nombre}
           </button>
         ))}

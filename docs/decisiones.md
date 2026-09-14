@@ -163,3 +163,53 @@ de página, no un diálogo superpuesto.
 código de sync (`api-cliente.ts`) chequea `servidorConfigurado()` antes de
 hacer un solo fetch. Esto mantiene la Fase 0 (beta standalone, GitHub
 Pages sin servidor) funcionando exactamente igual que antes.
+
+## Rediseño visual (post Fase 1)
+
+El usuario pidió, en dos rondas separadas, primero corregir el fondo (choque
+de grillas, ver commit de "estática industrial") y después un giro de
+identidad completo: "papel off-white, grilla de 12 columnas, sans-serif
+pesada en mayúsculas, monoespaciada para datos, negro + gris hormigón + un
+solo acento rojo, sin gradientes/redondeos/sombras suaves/glass, numerales
+de sección tipo manual técnico." Es la tercera identidad visual del
+proyecto en esta conversación (Geist del prompt original → navy/portfolio
+→ esto); se tomó como la definitiva y se aplicó a fondo, no como parche.
+
+**Las 5 categorías de color chocaban con "un solo acento rojo".** El
+prompt original pedía violeta/azul/verde/rojo/naranja por categoría; el
+pedido nuevo pide un único acento. En vez de ignorar uno de los dos, se
+resolvió así: cada categoría tiene un código mono de 3 letras
+(`FAC`/`PER`/`TAR`/`LAB`/`MAIL`, ver `lib/categorias.ts`) que la identifica
+sin usar color — más "manual técnico" que un punto de color de cualquier
+forma. El rojo queda reservado casi entero para "lab" (como una etiqueta
+de riesgo real: es la única categoría que involucra trabajo de
+laboratorio) y para lo que hace algo *ahora* (botones primarios, foco,
+"hoy", "sin conexión", "deshacer"). Un solo lugar del sistema usa el
+acento para algo que no es "lab" ni una acción: el chip de mail
+"relevante" en la vista Mails — mismo criterio semántico, "esto necesita
+tu atención".
+
+**Sombra dura en vez de sin sombra.** "Sin sombras suaves" no se leyó como
+"sin profundidad": popovers, ⌘K y el toast tienen un offset shadow con
+blur en cero (`6px 6px 0 var(--text)`), como una viñeta impresa — cumple
+la letra del pedido (nada de blur/glass) sin que todo quede pegado al
+plano.
+
+**Grano se mantiene, recoloreado.** La textura de estática (feTurbulence)
+de la ronda anterior se conserva — el pedido la menciona explícitamente
+("texturas de grano sutil") — solo se recolorea de motas blancas sobre
+navy a motas negras sobre papel, con el mismo coeficiente bajo para no
+repetir el error de la primera vez (grano tan fuerte que tapaba el fondo).
+
+**La paleta ⌘K queda en negro sólido, no en papel.** Es la única superficie
+que se invierte (fondo negro, texto papel) — un modo "consola" deliberado
+para la única herramienta de la app que se siente más "comando" que
+"documento". El resto del sistema es 100% papel/negro sobre el mismo
+fondo.
+
+**Grilla de 12 columnas: visual, no de layout.** Los divisores de 1px son
+un `repeating-linear-gradient` de fondo en `.app__contenido`, no una
+reestructuración de cada vista a 12 columnas reales — ninguna vista tiene
+contenido que se beneficie de dividirse en 12 partes iguales. Es el mismo
+espíritu que la "estática" que reemplaza: una textura de fondo con
+identidad, no un sistema de layout funcional.

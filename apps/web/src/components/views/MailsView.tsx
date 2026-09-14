@@ -21,7 +21,7 @@ export function MailsView() {
 
   return (
     <section className="vista">
-      <div className="vista__encabezado">
+      <div className="vista__encabezado" data-num="06">
         <h1>Mails</h1>
         <span className="vista__nota">Resumen diario · 08:00</span>
       </div>

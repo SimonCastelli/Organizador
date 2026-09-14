@@ -51,7 +51,7 @@ export function MesView() {
 
   return (
     <section className="vista">
-      <div className="vista__encabezado">
+      <div className="vista__encabezado" data-num="03">
         <h1>{format(ancla, "MMMM yyyy", { locale: es })}</h1>
         <div style={{ display: "flex", gap: 8 }}>
           <button className="boton-secundario" onClick={() => setAncla((a) => subMonths(a, 1))}>

@@ -28,7 +28,7 @@ export function SemanaView() {
 
   return (
     <section className="vista">
-      <div className="vista__encabezado">
+      <div className="vista__encabezado" data-num="02">
         <h1>
           {format(inicioSemana, "d MMM", { locale: es })} – {format(finSemana, "d MMM", { locale: es })}
         </h1>

@@ -80,7 +80,7 @@ export function TareasView() {
 
   return (
     <section className="vista">
-      <div className="vista__encabezado">
+      <div className="vista__encabezado" data-num="04">
         <h1>Tareas</h1>
         <span className="vista__nota">{pendientes.length} pendientes</span>
       </div>
