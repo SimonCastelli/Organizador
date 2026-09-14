@@ -76,3 +76,90 @@ describe la beta como una app plana en la raíz del repo
 (`apps/web`, `apps/server`, `packages/shared`) como parte de la Fase 1. Se
 mantuvo la Fase 0 fiel a esa descripción para no reestructurar código dos
 veces; la migración a monorepo se hace al agregar el backend.
+
+**Ramas: fusión directa a `main` sin PR.** El usuario lo pidió
+explícitamente después de ver que, al estar el repo vacío al arrancar,
+GitHub había creado `main` apuntando al mismo commit que la rama de
+trabajo. Desde la Fase 1 en adelante cada fase se fusiona a `main` al
+cerrarse, sin pull request de por medio.
+
+## Fase 1
+
+**El monorepo se armó en un commit separado, antes de tocar el backend.**
+Mover `apps/web` tal cual y extraer `packages/shared` no cambia
+comportamiento; mezclarlo con el diff del servidor hubiera hecho más
+difícil revisar cada cosa por separado.
+
+**LWW por campo, no por fila — con una columna oculta `campo_ts`.** El
+prompt pide explícitamente "last-write-wins por campo con `updatedAt`".
+Como el modelo del cliente (`Evento`, `Tarea`, `Materia`) solo tiene un
+`updatedAt` por registro entero, la granularidad por campo se resuelve en
+el servidor: cada tabla SQLite tiene una columna `campo_ts` (JSON
+`{columna: timestampISO}`) que recuerda cuándo se escribió *cada columna*
+por última vez. Una mutación entrante solo pisa una columna si su
+timestamp es más nuevo que el que ya tenía esa columna puntual — así dos
+dispositivos que editaron campos distintos del mismo registro offline no
+se pisan al sincronizar. Ver `apps/server/src/lib/lww.ts` y los tests de
+conflictos en `apps/server/test/api.test.ts`.
+
+**Los tombstones son una columna más, sujeta a la misma regla de LWW.**
+`deletedAt` no tiene tratamiento especial: es otro campo en `campo_ts`. Una
+edición vieja que llega tarde y no menciona `deletedAt` nunca resucita un
+registro que se borró después con un timestamp más nuevo.
+
+**`overrides`/`eliminados` de una Materia se sincronizan como un campo
+atómico (el blob JSON entero), no por clave interna.** Simplificación
+consciente: dos dispositivos que cancelan/editan *instancias de clase
+distintas* de la misma materia mientras ambos están offline pueden
+pisarse el blob completo al reconciliar (gana el que tenga el timestamp de
+esa escritura más nuevo). Para el caso de uso real —una persona, un
+usuario— el riesgo es bajo; que quede explícito si en algún momento se
+necesita LWW dentro del propio JSON.
+
+**`packages/shared` es TypeScript fuente, sin paso de build propio.** El
+`package.json` del paquete apunta `main`/`types`/`exports` directo a
+`src/index.ts`. Tanto Vite (para `apps/web`) como `tsx` (para
+`apps/server`) transpilan `.ts` al vuelo sin importar de dónde vengan (ni
+siquiera si están en `node_modules` vía symlink de workspace), así que no
+hace falta compilar `shared` aparte ni mantener sincronizado un `dist/`.
+
+**El servidor corre con `tsx`, no con un build de `tsc` a JS.** Mismo
+razonamiento: para un servidor de un solo usuario en un VPS chico, evitar
+un paso de compilación separado (y su propio `dist/`, su propio
+`tsconfig` de build, sus propios `outDir`) simplifica el Dockerfile y el
+día a día sin ningún costo real de performance.
+
+**Auth: el servidor rechaza todo si falta `AUTH_TOKEN`, en vez de dejarlo
+abierto por default.** Falla cerrado — más seguro para un usuario único
+que no va a tener un segundo ojo revisando la config del `.env` en
+producción.
+
+**Calendarios: se agregó una tabla propia, aunque el prompt solo pedía
+"eventos, tareas, materias, settings" como mínimo de la API.** El front ya
+modela `Calendario` como entidad (la lista togglable del sidebar) y la
+Fase 2 va a necesitar agregar ahí los calendarios de Google — mejor tener
+el tombstone/LWW resuelto desde ahora que parchearlo después.
+
+**Sync push+pull en un solo `POST /sync`, no dos endpoints.** El cliente
+manda `desde` (su cursor) y `mutaciones` (lo que encoló) en el mismo
+request; el servidor aplica las mutaciones y devuelve todo lo cambiado
+desde ese cursor, incluyendo lo que el cliente mismo acaba de escribir (ya
+reconciliado con lo que haya llegado de otro dispositivo). Un solo
+round-trip en vez de dos simplifica el cliente y evita una ventana rara
+entre "subí mis cambios" y "bajé los cambios ajenos".
+
+**Cliente: sync inmediata (debounced a 1.5s) + reintento fijo cada 20s.**
+No se implementó backoff exponencial: para una app de un usuario con un
+puñado de dispositivos, un intervalo fijo es más simple y suficiente. Si
+en algún momento el servidor empieza a devolver errores en cadena (no
+solo caídas de red), vale la pena revisar esto.
+
+**Pantalla de login como página completa, no modal.** Solo aparece si hay
+`VITE_API_URL` configurado y el servidor devuelve 401 — la regla de "sin
+modales ni confirmaciones" del diseño original se mantiene: es contenido
+de página, no un diálogo superpuesto.
+
+**Sin `VITE_API_URL`, la app nunca sabe que existe un backend.** Todo el
+código de sync (`api-cliente.ts`) chequea `servidorConfigurado()` antes de
+hacer un solo fetch. Esto mantiene la Fase 0 (beta standalone, GitHub
+Pages sin servidor) funcionando exactamente igual que antes.

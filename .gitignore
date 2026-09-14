@@ -9,6 +9,9 @@ dist-ssr
 *.db-journal
 *.sqlite
 *.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+apps/server/datos
 coverage
 .DS_Store
 playwright-report

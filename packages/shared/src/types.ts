@@ -17,6 +17,11 @@ export interface Calendario {
   origen: OrigenCalendario;
   /** Fase 2: id de la cuenta de Google a la que pertenece este calendario. */
   cuentaGoogleId?: string;
+  /** Solo la usa el servidor (Fase 1): los 5 calendarios de categoría no se
+   * borran nunca en la beta, pero un calendario de Google desconectado
+   * (Fase 2) sí, y necesita el mismo tombstone que cualquier otra entidad. */
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export type OrigenEvento = "manual" | "clase" | "tarea";
@@ -157,6 +162,9 @@ export interface Settings {
   minutosAntesAviso: number;
   simularSinConexion: boolean;
   ultimaSincronizacion: string | null;
+  /** Solo la usa el servidor (Fase 1) para saber si hace falta bajar
+   * settings en un /sync; la beta local nunca la lee ni la escribe. */
+  updatedAt?: string;
 }
 
 export interface EstadoSync {

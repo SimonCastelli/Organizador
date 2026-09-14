@@ -1,5 +1,6 @@
 import { useEffect, useState, type ComponentType } from "react";
 import { CommandPalette } from "./components/CommandPalette";
+import { PantallaLogin } from "./components/PantallaLogin";
 import { Sidebar } from "./components/Sidebar";
 import { Toast } from "./components/Toast";
 import { Topbar } from "./components/Topbar";
@@ -38,6 +39,10 @@ export default function App() {
   }, []);
 
   const VistaActual = VISTA_POR_ID[vista];
+
+  if (store.necesitaLogin) {
+    return <PantallaLogin onIniciarSesion={store.iniciarSesion} />;
+  }
 
   return (
     <div className="app">

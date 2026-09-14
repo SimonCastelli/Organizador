@@ -38,6 +38,7 @@ test("marca una tarea como hecha", async ({ page }) => {
 
 test("la paleta ⌘K crea un evento a partir de lenguaje natural", async ({ page }) => {
   await page.goto("/");
+  await expect(page.locator(".topbar__titulo")).toHaveText("Hoy");
   await page.keyboard.press("Meta+k");
 
   const input = page.locator(".cmdk input");
@@ -47,6 +48,20 @@ test("la paleta ⌘K crea un evento a partir de lenguaje natural", async ({ page
   await expect(page.getByRole("button", { name: /Crear evento/ })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(input).toBeHidden();
+});
+
+test("los datos persisten en IndexedDB después de recargar la página", async ({ page }) => {
+  await page.goto("/");
+  await page.locator(".sidebar__link", { hasText: "Tareas" }).click();
+
+  const texto = `Tarea de prueba ${Date.now()}`;
+  await page.locator('input[placeholder^="Nueva tarea"]').fill(texto);
+  await page.keyboard.press("Enter");
+  await expect(page.getByText(texto)).toBeVisible();
+
+  await page.reload();
+  await page.locator(".sidebar__link", { hasText: "Tareas" }).click();
+  await expect(page.getByText(texto)).toBeVisible();
 });
 
 test("eliminar un evento ofrece deshacer por toast", async ({ page }) => {

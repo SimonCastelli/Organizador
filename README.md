@@ -3,50 +3,96 @@
 Calendario + tareas personal para Simón (estudiante de Ingeniería en
 Computación, FIE). Usuario único, todo en español rioplatense.
 
-Esta es la **Fase 0**: la beta del front, 100% cliente, sin backend. Corre
-en Vite + React 19 + TypeScript + date-fns, persiste en `localStorage` y no
-usa ninguna librería de componentes ni Tailwind — todo el diseño está en
-`src/styles.css`.
+Monorepo con 3 paquetes (npm workspaces):
+
+- **`apps/web`** — el front: Vite + React 19 + TypeScript + date-fns, sin
+  librerías de UI. Funciona 100% offline-first: sin servidor configurado
+  corre exactamente como la beta de la Fase 0 (persistencia local); con
+  `VITE_API_URL` configurado, sincroniza con `apps/server`.
+- **`apps/server`** — Node + Express + SQLite (`better-sqlite3`). Usuario
+  único, sync offline-first con last-write-wins **por campo**.
+- **`packages/shared`** — tipos (`types.ts`) y el parser de lenguaje
+  natural (`parse-nl.ts`) que usan tanto el front como el server.
 
 ## Cómo correrlo
 
 Requiere Node 22+.
 
 ```bash
-npm install
-npm run dev       # http://localhost:5173
+npm install          # instala las 3 workspaces de una
+npm run dev:web       # front en http://localhost:5173 (sin servidor)
+npm run dev:server    # server en http://localhost:3001 (necesita apps/server/.env)
 ```
 
-Otros comandos:
+Otros comandos (todos corren en las 3 workspaces que correspondan):
 
 ```bash
-npm run build      # tsc --noEmit + build de producción a dist/
-npm run preview    # sirve dist/ para probar el build
-npm test           # vitest (parse-nl, generación de clases)
-npm run test:e2e   # playwright (smoke de las seis vistas)
+npm run build       # tsc --noEmit + build de producción del front
+npm test            # vitest: parse-nl, generación de clases, API + LWW del server
+npm run test:e2e    # playwright: smoke de las seis vistas (apps/web)
 ```
 
-## Arquitectura
+### Front solo (beta standalone, como la Fase 0)
 
-- **`src/lib/types.ts`** — modelo de datos: `Evento`, `Tarea`, `Materia`,
-  `ClaseGenerada`, `Mail`, `Settings`. `EventoUnificado` es la forma común
-  que usan las vistas de calendario para pintar eventos manuales, clases de
-  facultad y tareas-con-fecha con el mismo componente.
-- **`src/lib/store.tsx`** — `StoreProvider` + `useStore()`. Es la interfaz
-  `Ctx`: **el contrato entre la UI y la persistencia**. Ningún componente
-  toca `localStorage` directamente. La Fase 1 cambia qué hay detrás de este
-  contrato (IndexedDB + cola de sync + servidor) sin tocar un solo
-  componente.
-- **`src/lib/generar-clases.ts`** — las clases de facultad no son filas: se
-  generan en cada render a partir de `Materia.horarios` + `desde`/`hasta`.
-  `overrides` edita una instancia puntual (cambio de aula, horario
-  corrido); `eliminados` la cancela. Ambos indexan por
-  `claveInstancia(materiaId, fechaISO, índiceHorario)`.
-- **`src/lib/parse-nl.ts`** — parser de lenguaje natural en español
-  rioplatense ("mañana 15hs", "el viernes 10:30", "en 3 días") usado por la
-  paleta ⌘K y (en la Fase 2) por la detección de fecha/hora en mails.
-- **`src/lib/seed.ts`** — datos de arranque para que la app no nazca vacía.
-  Se reemplazan por completo en cuanto haya backend.
+Sin nada más que hacer: `npm run dev:web` y listo, persiste en IndexedDB de
+ese navegador. Así es como se despliega a GitHub Pages.
+
+### Front + server (offline-first real)
+
+1. `cp apps/server/.env.example apps/server/.env` y completá `AUTH_TOKEN`
+   (`openssl rand -hex 32`).
+2. `npm run dev:server`.
+3. En `apps/web/.env.local`: `VITE_API_URL=http://localhost:3001`.
+4. `npm run dev:web`. La primera vez pide el token (pantalla de login, no
+   modal) — es el mismo `AUTH_TOKEN` del `.env` del server.
+
+Con el server configurado, cada alta/edición/borrado en el front: (1) se
+aplica al toque en pantalla, (2) se guarda en IndexedDB, (3) se encola y se
+sube en el siguiente `POST /api/sync` (a los ~1.5s de inactividad, o cuando
+vuelve la conexión). El indicador "Al día / Sin conexión · N pendientes"
+del topbar refleja el tamaño real de esa cola. El toggle "Simular sin
+conexión" (en Ajustes) corta la sincronización sin tocar el estado real de
+red del navegador — para probar el flujo offline sin desenchufar nada.
+
+## Servidor: API y sync
+
+Auth de un solo usuario: `AUTH_TOKEN` largo en `.env`, mandado como
+`Authorization: Bearer <token>` o guardado en una cookie httpOnly por
+`POST /api/auth/login`. Sin registro, sin multiusuario.
+
+- `GET/POST/PATCH/DELETE /api/eventos`, `/api/tareas`, `/api/materias` —
+  REST directo (el DELETE es un soft-delete: pone `deletedAt`).
+- `GET/PATCH /api/settings` — singleton.
+- `GET/PATCH /api/calendarios` — los 5 calendarios de categoría vienen
+  precargados; solo se puede tocar `visible` (y, desde la Fase 2, los que
+  agregue el propio flujo de OAuth de Google).
+- `POST /api/sync` — el corazón offline-first: el cliente manda `desde`
+  (cursor de la última sync) + `mutaciones` (lo que encoló sin conexión);
+  el servidor las aplica y devuelve todo lo que cambió desde ese cursor
+  (tombstones incluidos) para que el cliente actualice su copia local.
+
+Conflictos: **last-write-wins por campo**, no por fila. Cada tabla tiene
+una columna oculta `campo_ts` (`{columna: timestampISO}`) — un patch solo
+pisa una columna si su timestamp es más nuevo que el que ya tenía *esa*
+columna. Si dos dispositivos editan campos distintos del mismo evento
+offline, ambos cambios sobreviven al sincronizar. Los borrados son
+tombstones (`deletedAt`), sujetos a la misma regla — así una edición vieja
+que llega tarde nunca resucita algo que ya se borró después.
+
+Ver `apps/server/src/lib/lww.ts` para la implementación y
+`apps/server/test/api.test.ts` para los casos de conflicto testeados.
+
+## Docker (VPS chico o tu PC Linux)
+
+```bash
+cp .env.example .env   # completá AUTH_TOKEN
+docker compose up -d --build
+```
+
+Levanta el server en `:3001` con la SQLite en un volumen (`datos_organizador`,
+sobrevive un `docker compose down`). `ORIGEN_PERMITIDO` en `.env` tiene que
+apuntar a donde sirvas el front (CORS). Para actualizar: `git pull &&
+docker compose up -d --build`.
 
 ## Vistas
 
@@ -57,30 +103,31 @@ vez de ser una séptima vista.
 
 ## Diseño
 
-Geist queda descartado: la identidad visual toma como referencia un
-portfolio personal ya aprobado — **Newsreader** (serif, texto) +
-**JetBrains Mono** (mono, datos/etiquetas/nav) sobre una base navy oscura
-con grid de fondo sutil. El color se reserva para barras de 3px, puntos de
-calendario y chips: facultad violeta, personal azul, tareas verde, lab
-rojo, mails naranja (azul y naranja/ámbar son los mismos acentos que ya
-usaba el portfolio de referencia).
+Identidad visual tomada de un portfolio personal ya aprobado —
+**Newsreader** (serif, texto) + **JetBrains Mono** (mono, datos/etiquetas/
+nav) sobre una base navy oscura con grid de fondo sutil. El color se
+reserva para barras de 3px, puntos de calendario y chips: facultad
+violeta, personal azul, tareas verde, lab rojo, mails naranja (azul y
+naranja/ámbar son los mismos acentos que ya usaba el portfolio de
+referencia).
 
 Reglas de interacción: motion < 300ms con ease-out, popovers siempre
-anclados al elemento que los abre (nunca modales centrados), la paleta ⌘K
-sin animación, y ningún flujo destructivo pide confirmación — borra y
-ofrece **deshacer por 6 segundos** en un toast.
+anclados al elemento que los abre (nunca modales centrados — ni siquiera
+el login), la paleta ⌘K sin animación, y ningún flujo destructivo pide
+confirmación: borra y ofrece **deshacer por 6 segundos** en un toast.
 
-## Deploy
+## Deploy del front
 
 GitHub Pages vía Actions (`.github/workflows/pages.yml`): cada push a
 `main` corre tests, build con `GITHUB_PAGES=1` (así `vite.config.ts` pone
-`base: "/Organizador/"`) y publica `dist/`.
+`base: "/Organizador/"`) y publica `apps/web/dist/`. Sin `VITE_API_URL` en
+ese build, Pages sirve la beta standalone (sin servidor).
 
 ## Estado del proyecto
 
-- [x] **Fase 0** — beta del front (este README).
-- [ ] **Fase 1** — backend Node/Express + SQLite, sync offline-first
-      (IndexedDB + cola de mutaciones + LWW), Docker Compose.
+- [x] **Fase 0** — beta del front.
+- [x] **Fase 1** — backend Node/Express + SQLite, sync offline-first
+      (IndexedDB + cola de mutaciones + LWW por campo), Docker Compose.
 - [ ] **Fase 2** — Google Calendar + Gmail (multi-cuenta).
 - [ ] **Fase 3** — Web Push + motor de tareas automáticas.
 - [ ] **Fase 4** — PWA instalable, TWA en Android, wrapper Tauri en Linux.
