@@ -28,7 +28,7 @@ import type {
   OverrideClase,
   Settings,
   Tarea,
-} from "./types";
+} from "@organizador/shared";
 
 const CLAVE_ALMACENAMIENTO = "agenda:v2";
 const DURACION_TOAST_MS = 6000;

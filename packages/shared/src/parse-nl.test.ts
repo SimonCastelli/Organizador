@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseNL } from "../lib/parse-nl";
+import { parseNL } from "./parse-nl";
 
 // Ancla fija para que los tests no dependan del día en que corren.
 // 2026-09-14 es lunes.

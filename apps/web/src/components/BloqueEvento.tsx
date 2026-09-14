@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import type { MouseEvent } from "react";
-import type { EventoUnificado } from "../lib/types";
+import type { EventoUnificado } from "@organizador/shared";
 
 interface BloqueEventoProps {
   evento: EventoUnificado;

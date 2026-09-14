@@ -1,10 +1,10 @@
 import { format } from "date-fns";
 import { useState } from "react";
 import { Popover } from "../Popover";
-import { parseNL } from "../../lib/parse-nl";
+import { parseNL } from "@organizador/shared";
 import { useStore } from "../../lib/store";
 import { usarPopoverAnclado } from "../../lib/usar-popover";
-import type { Tarea } from "../../lib/types";
+import type { Tarea } from "@organizador/shared";
 
 function FormularioTarea({ tarea, onCerrar }: { tarea: Tarea; onCerrar: () => void }) {
   const store = useStore();

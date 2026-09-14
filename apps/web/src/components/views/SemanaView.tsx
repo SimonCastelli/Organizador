@@ -7,7 +7,7 @@ import { FormularioEvento } from "../FormularioEvento";
 import { Popover } from "../Popover";
 import { useStore } from "../../lib/store";
 import { usarPopoverAnclado } from "../../lib/usar-popover";
-import type { EventoUnificado } from "../../lib/types";
+import type { EventoUnificado } from "@organizador/shared";
 
 export function SemanaView() {
   const store = useStore();

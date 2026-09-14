@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useState } from "react";
 import { useStore } from "../lib/store";
-import type { EventoUnificado } from "../lib/types";
+import type { EventoUnificado } from "@organizador/shared";
 
 interface DetalleEventoProps {
   evento: EventoUnificado;

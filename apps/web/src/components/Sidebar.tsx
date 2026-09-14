@@ -1,5 +1,5 @@
 import { VISTAS } from "../lib/vistas";
-import type { Calendario, Vista } from "../lib/types";
+import type { Calendario, Vista } from "@organizador/shared";
 
 interface SidebarProps {
   vistaActual: Vista;

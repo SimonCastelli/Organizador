@@ -1,4 +1,4 @@
-import type { Vista } from "./types";
+import type { Vista } from "@organizador/shared";
 
 /** Único lugar donde se listan las 6 vistas de la app (nav, paleta ⌘K, topbar). */
 export const VISTAS: { id: Vista; etiqueta: string }[] = [

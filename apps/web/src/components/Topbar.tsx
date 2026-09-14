@@ -1,7 +1,7 @@
 import { Popover } from "./Popover";
 import { usarPopoverAnclado } from "../lib/usar-popover";
 import { VISTAS } from "../lib/vistas";
-import type { EstadoSync, Settings, Vista } from "../lib/types";
+import type { EstadoSync, Settings, Vista } from "@organizador/shared";
 
 interface TopbarProps {
   vistaActual: Vista;

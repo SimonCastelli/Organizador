@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { claveInstancia, generarClases } from "../lib/generar-clases";
-import type { Materia } from "../lib/types";
+import type { Materia } from "@organizador/shared";
 
 function materiaBase(): Materia {
   return {

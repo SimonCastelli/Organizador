@@ -1,10 +1,10 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useMemo, useRef, useState } from "react";
-import { parseNL } from "../lib/parse-nl";
+import { parseNL } from "@organizador/shared";
 import { useStore } from "../lib/store";
 import { VISTAS } from "../lib/vistas";
-import type { Vista } from "../lib/types";
+import type { Vista } from "@organizador/shared";
 
 interface CommandPaletteProps {
   onCerrar: () => void;

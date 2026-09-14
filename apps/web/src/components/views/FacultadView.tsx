@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Popover } from "../Popover";
 import { useStore } from "../../lib/store";
 import { usarPopoverAnclado } from "../../lib/usar-popover";
-import type { DiaSemana, HorarioClase, Materia, TipoClase } from "../../lib/types";
+import type { DiaSemana, HorarioClase, Materia, TipoClase } from "@organizador/shared";
 
 const NOMBRES_DIA = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 

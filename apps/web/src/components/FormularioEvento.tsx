@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { useState } from "react";
-import type { Calendario, Evento } from "../lib/types";
+import type { Calendario, Evento } from "@organizador/shared";
 
 interface FormularioEventoProps {
   calendarios: Calendario[];

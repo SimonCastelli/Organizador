@@ -10,7 +10,7 @@ import { MesView } from "./components/views/MesView";
 import { SemanaView } from "./components/views/SemanaView";
 import { TareasView } from "./components/views/TareasView";
 import { useStore } from "./lib/store";
-import type { Vista } from "./lib/types";
+import type { Vista } from "@organizador/shared";
 
 const VISTA_POR_ID: Record<Vista, ComponentType> = {
   hoy: HoyView,

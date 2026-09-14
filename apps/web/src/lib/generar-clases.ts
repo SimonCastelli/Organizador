@@ -7,7 +7,7 @@ import {
   set,
   startOfDay,
 } from "date-fns";
-import type { ClaseGenerada, Materia } from "./types";
+import type { ClaseGenerada, Materia } from "@organizador/shared";
 
 /** Clave estable de una instancia de clase, usada como id sintético y como
  * llave en `overrides`/`eliminados`. `indiceHorario` es la posición del

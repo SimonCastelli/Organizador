@@ -1,5 +1,5 @@
 import { addDays, formatISO, startOfDay } from "date-fns";
-import type { Calendario, Mail, Materia, Settings, Tarea, Evento } from "./types";
+import type { Calendario, Mail, Materia, Settings, Tarea, Evento } from "@organizador/shared";
 
 // Datos de arranque para que la app no nazca vacía. Son solo para la beta:
 // en la Fase 1 esto se reemplaza por lo que traiga el servidor.
