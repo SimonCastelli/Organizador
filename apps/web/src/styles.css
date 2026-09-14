@@ -1,32 +1,38 @@
 /* Organizador — identidad visual
    Newsreader (serif, texto) + JetBrains Mono (mono, datos/etiquetas/nav).
-   Base monocroma navy oscura; el color solo aparece en barras de 3px,
-   puntos de calendario y chips de categoría. Motion < 300ms, ease-out,
-   prefers-reduced-motion respetado. Sin librerías de UI. */
+   Base monocroma en gris acero (neutro, no navy — así el azul/violeta de
+   categoría se distinguen del fondo en vez de mezclarse con él), con una
+   textura de estática/grano de fondo en vez de la grilla de líneas. El
+   color solo aparece en barras de 3px, puntos de calendario y chips de
+   categoría. Motion < 300ms, ease-out, prefers-reduced-motion respetado.
+   Sin librerías de UI. */
 
 :root {
-  --bg: #10151f;
-  --panel: #161d2b;
-  --panel-alto: #1c2536;
-  --line: #2a3648;
-  --text: #e9e6dc;
-  --text-dim: #8a97ab;
-  --amber: #dcaa4a;
-  --blue: #4d6d94;
+  --bg: #15161a;
+  --panel: #1c1d22;
+  --panel-alto: #232429;
+  --line: #34353b;
+  --text: #e8e6df;
+  --text-dim: #8d8e93;
+  --amber: #d9a13f;
+  --blue: #5b7891;
 
-  --cat-facultad: #9b87d8;
-  --cat-personal: #6f93bd;
-  --cat-tarea: #5fae7c;
-  --cat-lab: #c1584f;
-  --cat-mail: #dcaa4a;
+  --cat-facultad: #9884d6;
+  --cat-personal: #5b7891;
+  --cat-tarea: #5aab74;
+  --cat-lab: #bf5750;
+  --cat-mail: #d9a13f;
 
   --radio: 6px;
-  --sombra-popover: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --sombra-popover: 0 12px 32px rgba(0, 0, 0, 0.5);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur: 160ms;
 
   --fuente-texto: "Newsreader", Georgia, serif;
   --fuente-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Estática: grano fino generado con feTurbulence, no una imagen. */
+  --estatica: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.05 0.05 0.05 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 * {
@@ -41,15 +47,14 @@ body,
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: radial-gradient(ellipse 100% 60% at 50% -10%, rgba(255, 255, 255, 0.04), transparent 60%), var(--estatica);
+  background-repeat: no-repeat, repeat;
+  background-size: auto, 180px 180px;
+  background-attachment: fixed, fixed;
   color: var(--text);
   font-family: var(--fuente-texto);
   line-height: 1.5;
-  background-image: linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 56px 56px;
-  background-attachment: fixed;
-  background-position: -1px -1px;
 }
 
 button,
